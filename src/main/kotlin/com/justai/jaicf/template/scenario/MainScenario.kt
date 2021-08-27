@@ -2,57 +2,64 @@ package com.justai.jaicf.template.scenario
 
 import com.justai.jaicf.activator.caila.caila
 import com.justai.jaicf.builder.Scenario
+import kotlin.random.Random
 
 val mainScenario = Scenario {
     state("start") {
         activators {
             regex("/start")
-            intent("Hello")
+            intent("Start")
         }
         action {
-            reactions.run {
-                image("https://media.giphy.com/media/ICOgUNjpvO0PC/source.gif")
-                sayRandom(
-                    "Hello! How can I help?",
-                    "Hi there! How can I help you?"
-                )
-                buttons(
-                    "Help me!",
-                    "How are you?",
-                    "What is your name?"
-                )
-            }
+            reactions.say("Hello!")
         }
     }
 
-    state("bye") {
+    state("end") {
         activators {
-            intent("Bye")
+            regex("/end")
         }
 
         action {
             reactions.sayRandom(
-                "See you soon!",
-                "Bye-bye!"
+                "Game over!",
+                "Doesn't matter if you win or not, that was great!"
             )
-            reactions.image("https://media.giphy.com/media/EE185t7OeMbTy/source.gif")
         }
     }
 
-    state("smalltalk", noContext = true) {
+    state("game") {
         activators {
-            anyIntent()
+            regex("/game")
         }
 
-        action(caila) {
-            activator.topIntent.answer?.let { reactions.say(it) } ?: reactions.go("/fallback")
+        action {
+            reactions.say("Choose number from 1 to 10!")
+        }
+
+        state("game_context") {
+            activators {
+                catchAll()
+            }
+
+            action {
+                val randomValue = (1..10).random()
+                val userValue = request.input.toInt()
+
+                if (randomValue == userValue) {
+                    reactions.say("Success!")
+                    reactions.go("/end")
+                } else {
+                    reactions.say("Try again!")
+                    reactions.go("/game")
+                }
+            }
         }
     }
 
     fallback {
-        reactions.sayRandom(
-            "Sorry, I didn't get that...",
-            "Sorry, could you repeat please?"
-        )
+        val requestLength = request.input.length
+        reactions.say("There are $requestLength symbols in your request.")
     }
+
 }
