@@ -1,8 +1,6 @@
 package com.justai.jaicf.template.scenario
 
-import com.justai.jaicf.activator.caila.caila
 import com.justai.jaicf.builder.Scenario
-import kotlin.random.Random
 
 val mainScenario = Scenario {
     state("start") {
